@@ -583,7 +583,7 @@ std::vector<torch::Tensor> matmul_cuda_forward(
 
   // Dispatch
   if (mode == 0) {
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   matmul_cuda_forward_kernel<scalar_t><<<blocks, threads_per_block>>>(
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       b.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -596,7 +596,7 @@ std::vector<torch::Tensor> matmul_cuda_forward(
               .dtype(torch::kInt)
               .device(torch::kCUDA, a.device().index());
       auto indices = torch::zeros({batch_size, a_size, b_size}, options2);
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   max_cuda_forward_kernel<scalar_t><<<blocks, threads_per_block>>>(
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       b.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -611,7 +611,7 @@ std::vector<torch::Tensor> matmul_cuda_forward(
               .device(torch::kCUDA, a.device().index());
       auto indices = torch::zeros({batch_size, a_size, b_size}, options2);
       auto rand = torch::rand({batch_size, a_size, b_size}, options);
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   sample_cuda_forward_kernel<scalar_t><<<blocks, threads_per_block>>>(
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       b.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -654,7 +654,7 @@ std::vector<torch::Tensor> matmul_cuda_backward(
                     batch_size);
 
   if (mode == 0) {
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   matmul_cuda_backward_kernel_A<scalar_t><<<blocks, threads_per_block>>>(
                       grad_a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -665,7 +665,7 @@ std::vector<torch::Tensor> matmul_cuda_backward(
                                                                                          );
               }));
 
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   matmul_cuda_backward_kernel_B<scalar_t><<<blocks2, threads_per_block>>>(
                       grad_b.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -676,7 +676,7 @@ std::vector<torch::Tensor> matmul_cuda_backward(
               }));
   } else if (mode == 1 or mode == 2) {
 
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   max_cuda_backward_kernel_A<scalar_t><<<blocks, threads_per_block>>>(
                       grad_a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -686,7 +686,7 @@ std::vector<torch::Tensor> matmul_cuda_backward(
                       in_size, a_size, b_size);
               }));
 
-      AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+      AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
                   max_cuda_backward_kernel_B<scalar_t><<<blocks2, threads_per_block>>>(
                       grad_b.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                       a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -733,7 +733,7 @@ std::vector<torch::Tensor> banded_cuda_forward(
             .device(torch::kCUDA, a.device().index());
     auto indices = torch::zeros({batch_size, a_size, new_size}, options2);
 
-    AT_DISPATCH_FLOATING_TYPES(a.type(), "banded_forward_cuda", ([&] {
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "banded_forward_cuda", ([&] {
                 banded_cuda_forward_kernel_mul<scalar_t><<<blocks, threads_per_block>>>(
                     a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
                     b.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
@@ -781,7 +781,7 @@ std::vector<torch::Tensor> banded_cuda_backward(
     const dim3 threads_per_block(threads, threads, 1);
     auto grad_a = torch::zeros_like(a);
 
-    AT_DISPATCH_FLOATING_TYPES(a.type(), "matmul_forward_cuda", ([&] {
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(a.type(), "matmul_forward_cuda", ([&] {
        banded_cuda_backward_kernel_mul<scalar_t><<<blocks, threads_per_block>>>(
            grad_a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
            a.packed_accessor32<scalar_t,3,torch::RestrictPtrTraits>(),
